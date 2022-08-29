@@ -7,11 +7,18 @@ const create = (payload: IProduct<number>) => {
   if (!payloadIsValid) return { message: 'Invalid Payload!', code: status.BAD_REQUEST }; 
 
   const { error } = JOI.object({
-    name: JOI.string().required(),
-    amount: JOI.string().required(),
+    name: JOI.string().min(3).required(),
+    amount: JOI.string().min(3).required(),
   }).validate(payload);
+  
+  if (error) {
+    if (error.details[0].type.includes('required')) {
+      return { message: error.message, code: status.BAD_REQUEST };
+    }
 
-  if (error) return { message: error.message, code: status.BAD_REQUEST };
+    return { message: error.message, code: status.UNPROCESSABLE };
+  }
+
   return {};
 };
 
