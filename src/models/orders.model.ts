@@ -1,3 +1,4 @@
+import { ResultSetHeader } from 'mysql2';
 import connection from './connection';
 import IOrder from '../interfaces/order.interface';
 
@@ -32,6 +33,37 @@ async function getAll(): Promise<IOrder<number>[]> {
   return newOrders(request as IOrder<number>[]);
 }
 
+async function addOrder(userID: number, productId: number): Promise<void> {
+  const request = await connection.execute<ResultSetHeader>(`
+    INSERT INTO Trybesmith.Orders (userId) VALUES
+      (?);
+  `, [userID]);
+
+  const [dataInserted] = request;
+  
+  await connection.execute(`
+    UPDATE Trybesmith.Products
+    SET orderId = ?
+    WHERE id = ?;
+  `, [dataInserted.insertId, productId]);
+}
+
+async function create(payload: IOrder<number>)
+  : Promise<IOrder<number>> {
+  const promise = [];
+  
+  const products = payload.productsIds as [];
+
+  for (let index = 0; index < products.length; index += 1) {
+    promise.push(addOrder(payload.userId as number, products[index]));
+  }
+
+  await Promise.all(promise);
+
+  return payload;
+}
+
 export default {
   getAll,
+  create,
 };

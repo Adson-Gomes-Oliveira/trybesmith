@@ -2,6 +2,15 @@ import { ResultSetHeader } from 'mysql2';
 import connection from './connection';
 import { IUser, User } from '../interfaces/user.interface';
 
+async function findUser(payload: User): Promise<IUser<number>[]> {
+  const [request] = await connection.execute(`
+    SELECT * FROM Trybesmith.Users
+    WHERE username = ?;
+  `, [payload.username]);
+
+  return request as IUser<number>[];
+}
+
 async function checkCredentials(payload: User): Promise<boolean> {
   const [request] = await connection.execute(`
     SELECT * FROM Trybesmith.Users
@@ -30,5 +39,6 @@ async function create(payload: IUser<number>): Promise<IUser<number>> {
 
 export default {
   checkCredentials,
+  findUser,
   create,
 };

@@ -1,6 +1,6 @@
 interface IOrder<T> {
   id?: T,
-  userId: T,
+  userId?: T,
   productsIds?: number | [],
 }
 

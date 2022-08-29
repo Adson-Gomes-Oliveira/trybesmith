@@ -1,5 +1,5 @@
 import JWT from 'jsonwebtoken';
-import { Token, User, IUser } from '../interfaces/user.interface';
+import { Token, User } from '../interfaces/user.interface';
 // import dotenv from 'dotenv';
 
 // dotenv.config();
@@ -14,7 +14,14 @@ export const createToken = (user: User): Token => {
   return { token };
 };
 
-export const checkToken = (token: string): IUser<number> => {
+type Decoded = {
+  data: User,
+  iat: string,
+  exp: string,
+};
+
+export const checkToken = (token: string): User => {
   const decoded = JWT.verify(token, JWT_SECRET);
-  return decoded as IUser<number>;
+  const { data } = decoded as unknown as Decoded;
+  return data;
 };
