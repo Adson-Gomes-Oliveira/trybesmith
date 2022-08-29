@@ -1,6 +1,18 @@
 import { ResultSetHeader } from 'mysql2';
 import connection from './connection';
-import { IUser } from '../interfaces/user.interface';
+import { IUser, User } from '../interfaces/user.interface';
+
+async function checkCredentials(payload: User): Promise<boolean> {
+  const [request] = await connection.execute(`
+    SELECT * FROM Trybesmith.Users
+    WHERE username = ? AND password = ?;
+  `, [payload.username, payload.password]);
+
+  const userExist = Object.keys(request).length > 0;
+  
+  if (!userExist) return false;
+  return true;
+}
 
 async function create(payload: IUser<number>): Promise<IUser<number>> {
   const request = await connection.execute<ResultSetHeader>(`
@@ -17,5 +29,6 @@ async function create(payload: IUser<number>): Promise<IUser<number>> {
 }
 
 export default {
+  checkCredentials,
   create,
 };
